@@ -51,13 +51,17 @@ async fn process(socket: TcpStream, db: Db) {
         let response = match Command::from_frame(frame).expect("Failed to identify a command") {
             Set(cmd) => {
                 // Lock the database to perform an operation on it.
-                let mut db = db.lock().expect("Failed to get the control over the database");
+                let mut db = db
+                    .lock()
+                    .expect("Failed to get the control over the database");
                 db.insert(cmd.key().to_string(), Bytes::copy_from_slice(cmd.value()));
                 Frame::Simple("OK".to_string())
             } // end Set
             Get(cmd) => {
                 // Lock the database to perfrom an operation on it.
-                let db = db.lock().expect("Failed to get the control over the database");
+                let db = db
+                    .lock()
+                    .expect("Failed to get the control over the database");
                 // Determine if the value is set or not.
                 if let Some(val) = db.get(cmd.key()) {
                     // The value is found.
