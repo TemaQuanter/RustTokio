@@ -1,8 +1,11 @@
 use std::future::Future;
+use std::ops::DerefMut;
 use std::pin::Pin;
 use std::sync::{Arc, Mutex};
+use std::cell::RefCell;
 use std::thread;
 use std::time::Duration;
+use std::iter::Peekable;
 /// WARNING: This is a non-working code.
 /// TODO: Solve issues with mutability.
 use std::{
@@ -65,24 +68,29 @@ struct Interval<T>
 where
     T: Iterator,
 {
-    delay: Delay,
-    iter: Arc<Mutex<T>>,
+    delay: RefCell<Delay>,
+    iter: RefCell<Peekable<T>>,
     time_span: Duration,
 } // end struct Interval
 
 impl<T: Iterator> Stream for Interval<T> {
-    type Item = T;
+    type Item = T::Item;
 
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         // Check if all the repetition have already been performed.
-        if let Some(value) = Box::pin(&mut self.iter.lock().unwrap()).next() {
-            match Pin::new(&mut self.delay).poll(cx) {
+        let mut borrowed_iter = self.iter.borrow_mut();
+        if let Some(_) = borrowed_iter.peek() {
+            let mut delay = self.delay.borrow_mut();
+            match Pin::new(&mut *delay).poll(cx) {
                 Poll::Ready(_) => {
-                    let delay = Delay::new(self.time_span);
+                    let value = borrowed_iter.next().unwrap();
+                    let new_delay = Delay::new(self.time_span);
 
-                    self.delay = delay;
+                    drop(delay);
 
-                    return Poll::Ready(None);
+                    *self.delay.borrow_mut() = new_delay;
+
+                    return Poll::Ready(Some(value));
                 }
                 Poll::Pending => Poll::Pending,
             } // end match
@@ -92,9 +100,23 @@ impl<T: Iterator> Stream for Interval<T> {
     } // end poll_next()
 } // end impl Stream for Interval
 
+impl<T: Iterator> Interval<T> {
+    fn new(iter: T, delay: Duration) -> Self {
+        Self {
+            delay: RefCell::new(Delay::new(delay)),
+            iter: RefCell::new(iter.peekable()),
+            time_span: delay
+        } // end Self
+    } // end new()
+} // end impl Interval
+
 #[tokio::main]
 async fn main() {
-    let alarm: Delay = Delay::new(Duration::from_millis(1500));
+    let vc: Vec<String> = vec!["Hello".to_string(), "My".to_string(), "Dear".to_string(), "Friend".to_string()];
 
-    println!("{}", alarm.await);
+    let mut itr = Interval::new(vc.iter(), Duration::from_millis(1200));
+
+    while let Some(el) = itr.next().await {
+        println!("{}", el);
+    } // end while
 } // end main()
