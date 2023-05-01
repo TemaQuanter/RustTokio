@@ -1,13 +1,9 @@
-use std::future::Future;
-use std::ops::DerefMut;
-use std::pin::Pin;
-use std::sync::{Arc, Mutex};
 use std::cell::RefCell;
+use std::future::Future;
+use std::iter::Peekable;
+use std::pin::Pin;
 use std::thread;
 use std::time::Duration;
-use std::iter::Peekable;
-/// WARNING: This is a non-working code.
-/// TODO: Solve issues with mutability.
 use std::{
     task::{Context, Poll},
     time::Instant,
@@ -105,14 +101,19 @@ impl<T: Iterator> Interval<T> {
         Self {
             delay: RefCell::new(Delay::new(delay)),
             iter: RefCell::new(iter.peekable()),
-            time_span: delay
+            time_span: delay,
         } // end Self
     } // end new()
 } // end impl Interval
 
 #[tokio::main]
 async fn main() {
-    let vc: Vec<String> = vec!["Hello".to_string(), "My".to_string(), "Dear".to_string(), "Friend".to_string()];
+    let vc: Vec<String> = vec![
+        "Hello".to_string(),
+        "My".to_string(),
+        "Dear".to_string(),
+        "Friend".to_string(),
+    ];
 
     let mut itr = Interval::new(vc.iter(), Duration::from_millis(1200));
 

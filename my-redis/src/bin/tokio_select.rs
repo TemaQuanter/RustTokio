@@ -2,7 +2,7 @@ use tokio::sync::oneshot;
 
 async fn send_tx(tx: oneshot::Sender<i32>, num: i32) {
     tx.send(num).unwrap();
-        // .expect("Failed to send a message through the channel");
+    // .expect("Failed to send a message through the channel");
 } // end send_tx()
 
 #[tokio::main]
