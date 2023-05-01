@@ -431,6 +431,7 @@ dependencies = [
  "mini-redis",
  "rand",
  "tokio",
+ "tokio-stream",
 ]
 
 [[package]]

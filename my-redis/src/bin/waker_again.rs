@@ -1,8 +1,8 @@
 use std::future::Future;
 use std::task::{Context, Poll};
 use std::pin::Pin;
-use std::thread;
 use tokio::time::Instant;
+use std::thread;
 
 struct Greeter {
     dead_line: Instant
@@ -16,18 +16,7 @@ impl Future for Greeter {
         if self.dead_line <= Instant::now() {
             Poll::Ready("Time is up!")
         } else {
-            let cloned_waker = cx.waker().clone();
-            let dead_line = self.dead_line;
-
-            // Generate a new thread that will inform a caller that
-            // the task is ready to be called again.
-            thread::spawn(move || {
-                if dead_line < Instant::now() {
-                    thread::sleep(dead_line - Instant::now());
-                } // end if
-                cloned_waker.wake();
-            });
-
+            cx.waker().wake_by_ref();
             Poll::Pending
         } // end else
     } // end poll
