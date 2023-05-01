@@ -1,11 +1,11 @@
 use std::future::Future;
-use std::task::{Context, Poll};
 use std::pin::Pin;
-use tokio::time::Instant;
+use std::task::{Context, Poll};
 use std::thread;
+use tokio::time::Instant;
 
 struct Greeter {
-    dead_line: Instant
+    dead_line: Instant,
 } // end struct Greeter
 
 impl Future for Greeter {
@@ -24,9 +24,7 @@ impl Future for Greeter {
 
 impl Greeter {
     fn new(dead_line: Instant) -> Self {
-        Self {
-            dead_line
-        } // end Self
+        Self { dead_line } // end Self
     } // end now()
 } // end impl Greeter
 

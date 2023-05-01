@@ -1,8 +1,8 @@
+use std::future::{Future, Pending, Ready};
 use std::pin::Pin;
-use std::future::{Future, Ready, Pending};
-use tokio::sync::oneshot;
-use std::sync::{Mutex, Arc};
+use std::sync::{Arc, Mutex};
 use std::task::{Context, Poll};
+use tokio::sync::oneshot;
 
 struct Race {
     racer1: oneshot::Receiver<&'static str>,
@@ -29,16 +29,18 @@ impl Future for Race {
 
 #[tokio::main]
 async fn main() {
-    let (tx1, rx1) : (oneshot::Sender<&str>, oneshot::Receiver<&str>) = oneshot::channel();
-    let (tx2, rx2) : (oneshot::Sender<&str>, oneshot::Receiver<&str>) = oneshot::channel();
-    
+    let (tx1, rx1): (oneshot::Sender<&str>, oneshot::Receiver<&str>) = oneshot::channel();
+    let (tx2, rx2): (oneshot::Sender<&str>, oneshot::Receiver<&str>) = oneshot::channel();
+
     let ftr: Race = Race {
         racer1: rx1,
-        racer2: rx2
+        racer2: rx2,
     };
 
-    tx1.send("Foo").expect("Failed to send the data through the channel");
-    tx2.send("Bar").expect("Failed to send the data through the channel");
+    tx1.send("Foo")
+        .expect("Failed to send the data through the channel");
+    tx2.send("Bar")
+        .expect("Failed to send the data through the channel");
 
     ftr.await;
 } // end main()

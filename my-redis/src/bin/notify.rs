@@ -1,6 +1,6 @@
-use std::time::{Duration, Instant};
-use std::thread;
 use std::sync::Arc;
+use std::thread;
+use std::time::{Duration, Instant};
 
 use tokio::sync::Notify;
 
@@ -24,7 +24,6 @@ async fn delay(delay: Duration) {
 
         notify2.notify_one();
     });
-
 
     notify.notified().await;
 }

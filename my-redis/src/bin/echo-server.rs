@@ -1,5 +1,5 @@
-use tokio::net::TcpStream;
 use tokio::io::{self, AsyncReadExt, AsyncWriteExt, ReadHalf, WriteHalf};
+use tokio::net::TcpStream;
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
@@ -7,12 +7,16 @@ async fn main() -> io::Result<()> {
     let socket: TcpStream = TcpStream::connect("127.0.0.1:6666").await?;
 
     // Split the reader and writer streams.
-    let (mut rd, mut wr) : (ReadHalf<TcpStream>, WriteHalf<TcpStream>) = io::split(socket);
+    let (mut rd, mut wr): (ReadHalf<TcpStream>, WriteHalf<TcpStream>) = io::split(socket);
 
     // Write data in the background.
     tokio::spawn(async move {
-        wr.write_all(b"Hello,").await.expect("Failed to write the data to a stream");
-        wr.write_all(b"world!").await.expect("Failed to write the data to a steam");
+        wr.write_all(b"Hello,")
+            .await
+            .expect("Failed to write the data to a stream");
+        wr.write_all(b"world!")
+            .await
+            .expect("Failed to write the data to a steam");
     });
 
     let mut buf: Vec<u8> = vec![0; 128];

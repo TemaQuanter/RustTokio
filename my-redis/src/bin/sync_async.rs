@@ -1,7 +1,7 @@
+use std::thread;
 use tokio::runtime::{Builder, Runtime};
 use tokio::task::JoinHandle;
 use tokio::time::Duration;
-use std::thread;
 
 fn main() {
     let rt: Runtime = Builder::new_multi_thread()
@@ -25,7 +25,6 @@ fn main() {
         rt.block_on(tsk).expect("The task has failed");
     } // end for
 } // end main()
-
 
 async fn func(id: usize) {
     tokio::time::sleep(Duration::from_millis(1000 - 50 * (id as u64))).await;

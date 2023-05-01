@@ -1,15 +1,12 @@
 use std::{
     future::Future,
+    pin::Pin,
+    task::{Context, Poll},
     time::Duration,
-    task::{
-        Context,
-        Poll
-    },
-    pin::Pin
 };
 
 struct Alarm {
-    ftr: Pin<Box<dyn Future<Output = String>>>
+    ftr: Pin<Box<dyn Future<Output = String>>>,
 } // end struct Alarm
 
 impl Future for Alarm {
@@ -31,7 +28,9 @@ async fn sleep(duration: Duration) -> String {
 
 #[tokio::main]
 async fn main() {
-    let alarm: Alarm = Alarm { ftr: Box::pin(sleep(Duration::from_millis(1500)))};
+    let alarm: Alarm = Alarm {
+        ftr: Box::pin(sleep(Duration::from_millis(1500))),
+    };
 
     println!("{}", alarm.await);
 } // end main()

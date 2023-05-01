@@ -1,28 +1,28 @@
-/// WARNING: This is a non-working code.
-/// TODO: Solve issues with mutability.
-
-
-
-use std::{task::{Context, Poll}, time::Instant};
 use std::future::Future;
 use std::pin::Pin;
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-use tokio_stream::{StreamExt, Stream};
-use std::sync::{Arc, Mutex};
+/// WARNING: This is a non-working code.
+/// TODO: Solve issues with mutability.
+use std::{
+    task::{Context, Poll},
+    time::Instant,
+};
+use tokio_stream::{Stream, StreamExt};
 
 /// This structure is a modification of std::time::Delay that can be polled.
-/// 
+///
 struct Delay {
-    dead_line: Instant
+    dead_line: Instant,
 } // end struct Delay
 
 impl Delay {
     /// This function creates an initialized instance of Delay.
-    /// 
+    ///
     fn new(delay: Duration) -> Self {
         Self {
-            dead_line: Instant::now() + delay
+            dead_line: Instant::now() + delay,
         } // end Self
     } // end new()
 } // end impl Delay
@@ -38,7 +38,7 @@ impl Future for Delay {
             // Create a copy of a waker and a delay.
             let waker = cx.waker().clone();
             let dead_line = self.dead_line;
-            
+
             // Spawn a thread that will call the caller of 'await' after
             // enough time will have passed.
             tokio::spawn(async move {
@@ -60,11 +60,14 @@ impl Future for Delay {
 
 /// This structure allows to return the elements of an iterative structure
 /// in time intervals.
-/// 
-struct Interval<T> where T: Iterator {
+///
+struct Interval<T>
+where
+    T: Iterator,
+{
     delay: Delay,
     iter: Arc<Mutex<T>>,
-    time_span: Duration
+    time_span: Duration,
 } // end struct Interval
 
 impl<T: Iterator> Stream for Interval<T> {
@@ -76,12 +79,12 @@ impl<T: Iterator> Stream for Interval<T> {
             match Pin::new(&mut self.delay).poll(cx) {
                 Poll::Ready(_) => {
                     let delay = Delay::new(self.time_span);
-                    
+
                     self.delay = delay;
 
                     return Poll::Ready(None);
-                },
-                Poll::Pending => Poll::Pending
+                }
+                Poll::Pending => Poll::Pending,
             } // end match
         } else {
             return Poll::Ready(None);

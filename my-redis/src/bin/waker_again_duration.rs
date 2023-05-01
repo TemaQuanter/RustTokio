@@ -1,11 +1,11 @@
 use std::future::Future;
-use std::task::{Context, Poll};
 use std::pin::Pin;
+use std::task::{Context, Poll};
 use std::thread;
 use tokio::time::{Duration, Instant};
 
 struct Alarm {
-    dead_line: Instant
+    dead_line: Instant,
 } // end struct Alarm
 
 impl Future for Alarm {
@@ -36,7 +36,7 @@ impl Future for Alarm {
 impl Alarm {
     fn new(dead_line: Duration) -> Self {
         Self {
-            dead_line: Instant::now() + dead_line
+            dead_line: Instant::now() + dead_line,
         } // end Self
     } // end now()
 } // end impl Alarm

@@ -9,7 +9,13 @@ async fn main() -> io::Result<()> {
     // Read up to 10 bytes.
     file.read_to_end(&mut buffer).await?;
 
-    println!("The bytes are: {:?}", &buffer.iter().map(|bt| char::from(bt.clone())).collect::<String>());
+    println!(
+        "The bytes are: {:?}",
+        &buffer
+            .iter()
+            .map(|bt| char::from(bt.clone()))
+            .collect::<String>()
+    );
 
     Ok(())
 }
